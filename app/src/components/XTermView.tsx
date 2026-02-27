@@ -2,7 +2,7 @@ import React, { useRef, useCallback, useMemo, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { WebView, WebViewMessageEvent } from 'react-native-webview';
 
-const DEBUG_XTERM_BRIDGE = true;
+const DEBUG_XTERM_BRIDGE = false;
 
 function debugBridge(...args: unknown[]) {
   if (!DEBUG_XTERM_BRIDGE) return;

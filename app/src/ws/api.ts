@@ -15,8 +15,8 @@ export async function fetchSessions(
   const timeout = setTimeout(() => controller.abort(), 5000);
   try {
     const res = await fetch(
-      `http://${host}:${port}/api/sessions?token=${encodeURIComponent(token)}`,
-      { signal: controller.signal }
+      `http://${host}:${port}/api/sessions`,
+      { signal: controller.signal, headers: { Authorization: `Bearer ${token}` } }
     );
     clearTimeout(timeout);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -43,8 +43,8 @@ export async function fetchExternalSessions(
   const timeout = setTimeout(() => controller.abort(), 5000);
   try {
     const res = await fetch(
-      `http://${host}:${port}/api/external-sessions?token=${encodeURIComponent(token)}`,
-      { signal: controller.signal }
+      `http://${host}:${port}/api/external-sessions`,
+      { signal: controller.signal, headers: { Authorization: `Bearer ${token}` } }
     );
     clearTimeout(timeout);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -66,8 +66,8 @@ export async function deleteSession(
   const timeout = setTimeout(() => controller.abort(), 5000);
   try {
     const res = await fetch(
-      `http://${host}:${port}/api/sessions/${encodeURIComponent(sessionId)}?token=${encodeURIComponent(token)}`,
-      { method: 'DELETE', signal: controller.signal }
+      `http://${host}:${port}/api/sessions/${encodeURIComponent(sessionId)}`,
+      { method: 'DELETE', signal: controller.signal, headers: { Authorization: `Bearer ${token}` } }
     );
     clearTimeout(timeout);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);

@@ -24,7 +24,7 @@
       "edgeToEdgeEnabled": true,
       "softwareKeyboardLayoutMode": "adjustResize",
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.app"
+      "package": "com.clauderemote.app"
     },
     "web": {
       "favicon": "./assets/favicon.png"
