@@ -13,9 +13,9 @@ function authenticate(req, expectedToken) {
   // Check Authorization: Bearer <token>
   const authHeader = req.headers['authorization'];
   if (authHeader) {
-    const match = authHeader.match(/^Bearer\s+(.+)$/i);
-    if (match) {
-      const provided = Buffer.from(match[1], 'utf-8');
+    const lower = authHeader.toLowerCase();
+    if (lower.startsWith('bearer ')) {
+      const provided = Buffer.from(authHeader.slice(7).trim(), 'utf-8');
       if (provided.length === tokenBuffer.length && crypto.timingSafeEqual(provided, tokenBuffer)) {
         return true;
       }
