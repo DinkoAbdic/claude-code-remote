@@ -11,6 +11,8 @@ const MessageType = {
 
   // Session
   SESSION_CREATED: 'session.created',
+  SESSION_ENDED: 'session.ended',
+  SESSION_IDLE: 'session.idle',
 
   // Error
   ERROR: 'error',
@@ -39,12 +41,23 @@ function validate(msg) {
   return null; // valid
 }
 
-function makeSessionCreated(sessionId, cols, rows) {
+function makeSessionCreated(sessionId, cols, rows, metadata) {
   return JSON.stringify({
     type: MessageType.SESSION_CREATED,
     sessionId,
     cols,
     rows,
+    cwd: metadata?.cwd || null,
+    name: metadata?.name || null,
+    createdAt: metadata?.createdAt || null,
+  });
+}
+
+function makeSessionEnded(sessionId, reason) {
+  return JSON.stringify({
+    type: MessageType.SESSION_ENDED,
+    sessionId,
+    reason,
   });
 }
 
@@ -56,6 +69,13 @@ function makeTerminalOutput(sessionId, data) {
   });
 }
 
+function makeSessionIdle(sessionId) {
+  return JSON.stringify({
+    type: MessageType.SESSION_IDLE,
+    sessionId,
+  });
+}
+
 function makeError(message) {
   return JSON.stringify({
     type: MessageType.ERROR,
@@ -63,4 +83,4 @@ function makeError(message) {
   });
 }
 
-module.exports = { MessageType, validate, makeSessionCreated, makeTerminalOutput, makeError };
+module.exports = { MessageType, validate, makeSessionCreated, makeSessionEnded, makeSessionIdle, makeTerminalOutput, makeError };

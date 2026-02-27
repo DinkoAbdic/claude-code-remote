@@ -1,49 +1,18 @@
 import React from 'react';
-import { View, TouchableOpacity, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 
 interface Props {
   onKey: (data: string) => void;
 }
 
-interface KeyDef {
-  label: string;
-  value: string;
-  width?: number;
-}
-
-const KEYS: KeyDef[] = [
-  { label: 'Esc', value: '\x1b' },
-  { label: 'Tab', value: '\t' },
-  { label: 'Ctrl', value: 'MODIFIER_CTRL' },
-  { label: 'Alt', value: 'MODIFIER_ALT' },
-  { label: '↑', value: '\x1b[A' },
-  { label: '↓', value: '\x1b[B' },
-  { label: '←', value: '\x1b[D' },
-  { label: '→', value: '\x1b[C' },
-  { label: '|', value: '|' },
-  { label: '/', value: '/' },
-  { label: '-', value: '-' },
-  { label: '~', value: '~' },
-];
-
 export function KeyboardBar({ onKey }: Props) {
   const [ctrlActive, setCtrlActive] = React.useState(false);
   const [altActive, setAltActive] = React.useState(false);
 
-  const handlePress = (key: KeyDef) => {
-    if (key.value === 'MODIFIER_CTRL') {
-      setCtrlActive((v) => !v);
-      return;
-    }
-    if (key.value === 'MODIFIER_ALT') {
-      setAltActive((v) => !v);
-      return;
-    }
-
-    let data = key.value;
+  const handleKey = (value: string) => {
+    let data = value;
 
     if (ctrlActive && data.length === 1) {
-      // Ctrl+<letter> = char code 1-26
       const code = data.toLowerCase().charCodeAt(0) - 96;
       if (code >= 1 && code <= 26) {
         data = String.fromCharCode(code);
@@ -59,28 +28,63 @@ export function KeyboardBar({ onKey }: Props) {
     onKey(data);
   };
 
+  const handleModifier = (mod: 'ctrl' | 'alt') => {
+    if (mod === 'ctrl') setCtrlActive((v) => !v);
+    else setAltActive((v) => !v);
+  };
+
   return (
     <View style={styles.container}>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} keyboardShouldPersistTaps="always">
-        {KEYS.map((key) => {
-          const isActive =
-            (key.value === 'MODIFIER_CTRL' && ctrlActive) ||
-            (key.value === 'MODIFIER_ALT' && altActive);
+      {/* Main keys */}
+      <View style={styles.keysRow}>
+        <TouchableOpacity style={styles.key} onPress={() => handleKey('\r')} activeOpacity={0.5}>
+          <Text style={styles.keyText}>Enter</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.key} onPress={() => handleKey('\x1b')} activeOpacity={0.5}>
+          <Text style={styles.keyText}>Esc</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.key} onPress={() => handleKey('\t')} activeOpacity={0.5}>
+          <Text style={styles.keyText}>Tab</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.key, ctrlActive && styles.keyActive]}
+          onPress={() => handleModifier('ctrl')}
+          activeOpacity={0.5}
+        >
+          <Text style={[styles.keyText, ctrlActive && styles.keyTextActive]}>Ctrl</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.key, altActive && styles.keyActive]}
+          onPress={() => handleModifier('alt')}
+          activeOpacity={0.5}
+        >
+          <Text style={[styles.keyText, altActive && styles.keyTextActive]}>Alt</Text>
+        </TouchableOpacity>
+      </View>
 
-          return (
-            <TouchableOpacity
-              key={key.label}
-              style={[styles.key, isActive && styles.keyActive]}
-              onPress={() => handlePress(key)}
-              activeOpacity={0.6}
-            >
-              <Text style={[styles.keyText, isActive && styles.keyTextActive]}>
-                {key.label}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </ScrollView>
+      {/* D-pad */}
+      <View style={styles.dpad}>
+        {/* Top row: Up arrow */}
+        <View style={styles.dpadRow}>
+          <View style={styles.dpadSpacer} />
+          <TouchableOpacity style={styles.dpadKey} onPress={() => handleKey('\x1b[A')} activeOpacity={0.5}>
+            <Text style={styles.arrowText}>{'\u25B2'}</Text>
+          </TouchableOpacity>
+          <View style={styles.dpadSpacer} />
+        </View>
+        {/* Bottom row: Left, Down, Right */}
+        <View style={styles.dpadRow}>
+          <TouchableOpacity style={styles.dpadKey} onPress={() => handleKey('\x1b[D')} activeOpacity={0.5}>
+            <Text style={styles.arrowText}>{'\u25C0'}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.dpadKey} onPress={() => handleKey('\x1b[B')} activeOpacity={0.5}>
+            <Text style={styles.arrowText}>{'\u25BC'}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.dpadKey} onPress={() => handleKey('\x1b[C')} activeOpacity={0.5}>
+            <Text style={styles.arrowText}>{'\u25B6'}</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     </View>
   );
 }
@@ -89,26 +93,58 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: '#2d2d2d',
     paddingVertical: 6,
-    paddingHorizontal: 4,
-  },
-  key: {
-    backgroundColor: '#3c3c3c',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    marginHorizontal: 3,
-    borderRadius: 4,
-    minWidth: 40,
+    paddingHorizontal: 6,
+    flexDirection: 'row',
     alignItems: 'center',
   },
+  keysRow: {
+    flex: 1,
+    flexDirection: 'row',
+    gap: 6,
+  },
+  key: {
+    flex: 1,
+    backgroundColor: '#3c3c3c',
+    paddingVertical: 12,
+    borderRadius: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   keyActive: {
-    backgroundColor: '#569cd6',
+    backgroundColor: '#da7756',
   },
   keyText: {
     color: '#d4d4d4',
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '600',
   },
   keyTextActive: {
     color: '#fff',
+  },
+  // D-pad cluster
+  dpad: {
+    marginLeft: 8,
+    width: 108,
+  },
+  dpadRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 2,
+  },
+  dpadSpacer: {
+    width: 34,
+    height: 2,
+  },
+  dpadKey: {
+    width: 34,
+    height: 30,
+    backgroundColor: '#3c3c3c',
+    borderRadius: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  arrowText: {
+    color: '#d4d4d4',
+    fontSize: 12,
   },
 });

@@ -7,6 +7,8 @@ export const MessageType = {
   TERMINAL_OUTPUT: 'terminal.output',
   TERMINAL_RESIZE: 'terminal.resize',
   SESSION_CREATED: 'session.created',
+  SESSION_ENDED: 'session.ended',
+  SESSION_IDLE: 'session.idle',
   ERROR: 'error',
 } as const;
 
@@ -34,6 +36,20 @@ export interface SessionCreatedMessage {
   sessionId: string;
   cols: number;
   rows: number;
+  cwd?: string;
+  name?: string;
+  createdAt?: string;
+}
+
+export interface SessionEndedMessage {
+  type: typeof MessageType.SESSION_ENDED;
+  sessionId: string;
+  reason: string;
+}
+
+export interface SessionIdleMessage {
+  type: typeof MessageType.SESSION_IDLE;
+  sessionId: string;
 }
 
 export interface ErrorMessage {
@@ -41,7 +57,7 @@ export interface ErrorMessage {
   message: string;
 }
 
-export type ServerMessage = TerminalOutputMessage | SessionCreatedMessage | ErrorMessage;
+export type ServerMessage = TerminalOutputMessage | SessionCreatedMessage | SessionEndedMessage | SessionIdleMessage | ErrorMessage;
 export type ClientMessage = TerminalInputMessage | TerminalResizeMessage;
 
 export function makeTerminalInput(sessionId: string, data: string): string {

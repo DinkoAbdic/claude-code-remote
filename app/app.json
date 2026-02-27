@@ -1,16 +1,17 @@
 {
   "expo": {
-    "name": "app",
-    "slug": "app",
+    "name": "Claude Remote",
+    "slug": "claude-remote",
+    "scheme": "clauderemote",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
     "newArchEnabled": false,
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#1e1e1e"
     },
     "ios": {
       "supportsTablet": true
@@ -18,15 +19,21 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#1e1e1e"
       },
       "edgeToEdgeEnabled": true,
+      "softwareKeyboardLayoutMode": "adjustResize",
       "predictiveBackGestureEnabled": false,
       "package": "com.anonymous.app"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": []
+    "plugins": [
+      ["expo-camera", { "cameraPermission": "Allow Claude Code Remote to use the camera to scan setup QR codes" }],
+      ["expo-build-properties", { "android": { "usesCleartextTraffic": true, "permissions": ["android.permission.RECORD_AUDIO", "android.permission.FOREGROUND_SERVICE", "android.permission.FOREGROUND_SERVICE_DATA_SYNC"] } }],
+      "expo-notifications",
+      "./plugins/withBackgroundServiceType"
+    ]
   }
 }
