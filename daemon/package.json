@@ -1,8 +1,11 @@
 {
-  "name": "claude-code-remote-daemon",
-  "version": "0.1.0",
+  "name": "@dinko_abdic/claude-code-remote",
+  "version": "0.1.1",
   "description": "WebSocket daemon that relays terminal sessions for Claude Code Remote",
   "main": "src/index.js",
+  "bin": {
+    "claude-code-remote": "src/index.js"
+  },
   "scripts": {
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
