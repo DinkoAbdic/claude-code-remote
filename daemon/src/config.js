@@ -40,12 +40,19 @@ function loadOrCreate() {
     port: 8485,
     sandboxRoot: null,
     shell: detectShell(),
+    defaultCwd: null,
+    sessionKeepAliveMinutes: 30,
   };
 
   fs.writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2), 'utf-8');
   logger.info(`Config created at ${CONFIG_PATH}`);
-  logger.info(`Auth token: ${config.token}`);
+  logger.info('Auth token generated \u2014 see config file');
   return config;
 }
 
-module.exports = { loadOrCreate, CONFIG_PATH };
+function saveConfig(config) {
+  fs.writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2), 'utf-8');
+  logger.info('Config saved');
+}
+
+module.exports = { loadOrCreate, saveConfig, CONFIG_PATH };

@@ -26,9 +26,14 @@ Thumbs.db
 
 # Build artifacts
 *.apk
+*.pdf
 
 # Claude Code settings
 .claude/
+
+#MD files
+Implementation.md
+plan.md
 
 # Config (contains auth token)
 # Note: config.json lives in %APPDATA%, not in repo

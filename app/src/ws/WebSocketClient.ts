@@ -8,22 +8,52 @@ const MAX_RETRY_DELAY = 30000;
 
 export class WebSocketClient {
   private ws: WebSocket | null = null;
-  private url: string = '';
+  private baseUrl: string = '';
   private onMessage: MessageHandler | null = null;
   private onStatusChange: StatusHandler | null = null;
   private retryDelay = INITIAL_RETRY_DELAY;
   private retryTimer: ReturnType<typeof setTimeout> | null = null;
   private intentionalClose = false;
+  private _sessionId: string | null = null;
+
+  // Stored connection params for reconnection
+  private _host: string = '';
+  private _port: number = 0;
+  private _token: string = '';
+  private _deviceName: string = '';
+
+  get sessionId() { return this._sessionId; }
+  set sessionId(id: string | null) { this._sessionId = id; }
+
+  get host() { return this._host; }
+  get port() { return this._port; }
+  get token() { return this._token; }
+
+  /** True if the underlying WebSocket is open right now */
+  get isConnected() { return this.ws?.readyState === WebSocket.OPEN; }
+
+  /** True if a connection or retry is in progress */
+  get isConnecting() {
+    return this.ws?.readyState === WebSocket.CONNECTING || this.retryTimer !== null;
+  }
 
   setHandlers(onMessage: MessageHandler, onStatusChange: StatusHandler) {
     this.onMessage = onMessage;
     this.onStatusChange = onStatusChange;
   }
 
-  connect(host: string, port: number, token: string) {
+  connect(host: string, port: number, token: string, cwd?: string, name?: string, deviceName?: string) {
+    this._host = host;
+    this._port = port;
+    this._token = token;
+    if (deviceName) this._deviceName = deviceName;
     this.intentionalClose = false;
     this.retryDelay = INITIAL_RETRY_DELAY;
-    this.url = `ws://${host}:${port}?token=${encodeURIComponent(token)}`;
+    let url = `ws://${host}:${port}?token=${encodeURIComponent(token)}`;
+    if (cwd) url += `&cwd=${encodeURIComponent(cwd)}`;
+    if (name) url += `&name=${encodeURIComponent(name)}`;
+    if (this._deviceName) url += `&deviceName=${encodeURIComponent(this._deviceName)}`;
+    this.baseUrl = url;
     this._connect();
   }
 
@@ -37,7 +67,11 @@ export class WebSocketClient {
     }
 
     this.onStatusChange?.('connecting');
-    this.ws = new WebSocket(this.url);
+    let url = this.baseUrl;
+    if (this._sessionId) {
+      url += `&sessionId=${encodeURIComponent(this._sessionId)}`;
+    }
+    this.ws = new WebSocket(url);
 
     this.ws.onopen = () => {
       this.retryDelay = INITIAL_RETRY_DELAY;
@@ -87,6 +121,7 @@ export class WebSocketClient {
     }
   }
 
+  /** Close WS but keep sessionId for later reconnection */
   disconnect() {
     this.intentionalClose = true;
     if (this.retryTimer) {
@@ -98,6 +133,32 @@ export class WebSocketClient {
       this.ws = null;
     }
     this.onStatusChange?.('disconnected');
+  }
+
+  /** Close WS and clear sessionId (full reset) */
+  reset() {
+    this._sessionId = null;
+    this.disconnect();
+  }
+
+  /** Switch to an existing session by closing current WS and reconnecting */
+  switchSession(sessionId: string) {
+    this.disconnect();
+    this._sessionId = sessionId;
+    // Rebuild base URL without cwd (reconnecting to existing session)
+    let url = `ws://${this._host}:${this._port}?token=${encodeURIComponent(this._token)}`;
+    if (this._deviceName) url += `&deviceName=${encodeURIComponent(this._deviceName)}`;
+    this.baseUrl = url;
+    this.intentionalClose = false;
+    this.retryDelay = INITIAL_RETRY_DELAY;
+    this._connect();
+  }
+
+  /** Close current WS and connect fresh (daemon creates new session) */
+  connectNew(cwd?: string) {
+    this.disconnect();
+    this._sessionId = null;
+    this.connect(this._host, this._port, this._token, cwd);
   }
 }
 
