@@ -34,6 +34,7 @@ Thumbs.db
 #MD files
 Implementation.md
 plan.md
+SECURITY-AUDIT.md
 
 # Config (contains auth token)
 # Note: config.json lives in %APPDATA%, not in repo
