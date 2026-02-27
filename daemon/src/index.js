@@ -272,7 +272,7 @@ localServer.on('upgrade', upgradeHandler);
 let tsServer = null;
 
 // --- WebSocket server (noServer mode) ---
-const wss = new WebSocketServer({ noServer: true });
+const wss = new WebSocketServer({ noServer: true, maxPayload: 10 * 1024 * 1024 });
 
 // --- Connection handling ---
 wss.on('connection', (ws, req) => {
